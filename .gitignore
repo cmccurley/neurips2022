@@ -1,0 +1,14 @@
+*.png
+*.jpg
+*.jpeg
+*.PNG
+*.JPG
+*.JPEG
+*.txt
+*.json
+*.pth
+*.npy
+*.pyc
+*.mat
+*.db
+.DS_store
