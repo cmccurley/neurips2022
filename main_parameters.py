@@ -52,13 +52,13 @@ def set_parameters(args):
     
     parser = argparse.ArgumentParser(description='Training script for bag-level classifier.')
     
-#    parser.add_argument('--run_mode', help='Mode to train, test, or compute CAMS. (cam)', default='rank_features', type=str)
+    parser.add_argument('--run_mode', help='Mode to train, test, or compute CAMS. (cam)', default='test', type=str)
     
     ######################################################################
     ######################### Input Parameters ###########################
     ######################################################################
     
-    parser.add_argument('--DATASET', help='Dataset selection.', default='dsiac', type=str)
+    parser.add_argument('--DATASET', help='Dataset selection.', default='mnist', type=str)
     parser.add_argument('--DATABASENAME', help='Relative path to the training data list.', default='', type=str)
  
     parser.add_argument('--target_classes', help='List of target classes.', nargs='+', default=['aeroplane'])
@@ -96,9 +96,9 @@ def set_parameters(args):
     
 #    ## Hyperparameters
 #    parser.add_argument('--NUM_CLASSES', help='Number of classes in the data set.', default=2, type=int)
-    parser.add_argument('--BATCH_SIZE', help='Input batch size for training.', default=1, type=int)
-#    parser.add_argument('--EPOCHS', help='Number of epochs to train.', default=100, type=int)
-#    parser.add_argument('--LR', help='Learning rate.', default=0.001, type=float)
+    parser.add_argument('--BATCH_SIZE', help='Input batch size for training.', default=20, type=int)
+    parser.add_argument('--EPOCHS', help='Number of epochs to train.', default=100, type=int)
+    parser.add_argument('--LR', help='Learning rate.', default=0.001, type=float)
 #    
 #    ## Updating  
 #    parser.add_argument('--update_on_epoch', help='Number of epochs to update loss script.', default=5, type=int)
@@ -114,7 +114,7 @@ def set_parameters(args):
     
     ## Output parameters
     parser.add_argument('--loss_file', help='Where to save training and validation loss updates.', default='/loss.txt', type=str)
-    parser.add_argument('--outf', help='Where to save output files.', default='./dsiac/vgg16/output', type=str)
+    parser.add_argument('--outf', help='Where to save output files.', default='./output/mnist/vgg16/output', type=str)
     parser.add_argument('--NUMWORKERS', help='', default=0, type=int)
     
     
