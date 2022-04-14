@@ -58,7 +58,7 @@ from torchvision.transforms import ToTensor
 import main_parameters
 import initialize_network
 
-from utilities import define_transforms, define_dataloaders
+from utilities import define_transforms, define_dataloaders, cam_model_transforms
 from train_network import train_model
 from test_network import test_model
 
@@ -137,6 +137,7 @@ if __name__== "__main__":
         ######################################################################
         ## Test image-level classifier
         test_model(model, test_loader, classes, device, parameters)
+        
 
     elif (parameters.run_mode == 'cam'):
         ######################################################################
@@ -556,4 +557,188 @@ if __name__== "__main__":
 #                plt.imshow(norm_cam,cmap='gray')
 #                plt.title('CAM Segmentation')
     
+    elif ( parameters.run_mode == 'evaluate_cam_faithfulness'):
+        
+        ######################################################################
+        ##################### Evaluate CAM Faithfulness ######################
+        ######################################################################
+        import numpy as np
+        import matplotlib.pyplot as plt
+        from cam_functions import GradCAM, LayerCAM, ScoreCAM, GradCAMPlusPlus, AblationCAM, EigenCAM
+        from cam_functions.utils.image import show_cam_on_image, preprocess_image
+        
+        results_dict = dict()
+        visualization_results = dict()
+              
+        norm_image = cam_model_transforms(parameters)
+        
+        methods = \
+        {"gradcam": GradCAM,
+         "scorecam": ScoreCAM,
+         "gradcam++": GradCAMPlusPlus,
+         "ablationcam": AblationCAM,
+         "eigencam": EigenCAM,
+         "layercam": LayerCAM}
+        
+        if (parameters.model == 'vgg16'):
+            cam_layers = \
+            {4:"layer1",
+             9:"layer2",
+             16:"layer3",
+             23:"layer4",
+             30:"layer5"}
+
+        ## Turn on gradients for CAM computation 
+        for param in model.parameters():
+            param.requires_grad = True
     
+        model.eval()
+        
+        for current_cam in parameters.cams:
+            for layer in parameters.layers:      
+                
+                n_samples = len(test_loader)
+#                metric_iou = np.zeros(n_samples, dtype="float32")
+#                metric_precision = np.zeros(n_samples, dtype="float32")
+#                metric_recall = np.zeros(n_samples, dtype="float32")
+#                metric_f1_score = np.zeros(n_samples, dtype="float32")
+                
+                current_model = current_cam + '_' + cam_layers[layer]
+#                print(current_model+'_thresh_'+str(thresh))
+            
+                cam_algorithm = methods[current_cam]
+            
+                if (parameters.model == 'vgg16'):
+                    cam = cam_algorithm(model=model, target_layers=[model.features[layer]], use_cuda=parameters.cuda)
+    
+                target_category = None
+                
+                idx = 0
+                for data in tqdm(test_loader):
+              
+#                    images, labels, gt_images = data[0].to(device), data[1].to(device), data[2]
+                    
+                    images, labels = data[0].to(device), data[1].to(device)
+                    
+                    ## Normalize input to the model
+                    model_input = norm_image(images)
+                    
+                    ## Get estimated image-level label
+                    
+#                    criterion = nn.CrossEntropyLoss()
+#                    loss = criterion(outputs, labels)
+                    
+                    pred_label = model(model_input).argmax()
+                    
+                    ####################### Get CAM Heatmap #######################
+                    grayscale_cam = cam(input_tensor=model_input, target_category=int(pred_label))
+                    grayscale_cam = grayscale_cam[0, :]
+                    
+                    ## Visualize input and CAMs
+                    images = images.permute(2,3,1,0)
+                    images = images.detach().cpu().numpy()
+                    image = images[:,:,:,0]
+                    img = image
+                    
+                    ## Plot CAMs
+                    fig, axis = plt.subplots(nrows=1, ncols=2)
+                    axis[0].imshow(img) 
+                    cam_image = show_cam_on_image(img, grayscale_cam, True)
+                    axis[1].imshow(cam_image, cmap='jet')
+            
+                    
+        
+                        
+#                    metric_iou[idx] = round(iou_score,5)
+#                    
+#                    
+#    #                            prec, rec, f1, _ = prfs(gt_img.reshape(gt_img.shape[0]*gt_img.shape[1]), 
+#    #                                                    pred_img.reshape(pred_img.shape[0]*pred_img.shape[1]),
+#    #                                                    pos_label=1,
+#    #                                                    average='binary') 
+#                    prec = 0
+#                    rec = 0
+#                    f1 = 0
+#                    
+#                    metric_precision[idx], metric_recall[idx], metric_f1_score[idx] = round(prec,5), round(rec,5), round(f1,5)
+#                    
+#                    idx +=1
+#                    
+#                    images.detach()
+#                    labels.detach()
+#                    gt_images.detach()
+#                    model_input.detach()
+#                            
+#                            
+#                    ## Compute statistics over the entire test set
+#                    metric_iou_mean = round(np.mean(metric_iou),3)
+#                    metric_iou_std = round(np.std(metric_iou),3)
+#                    metric_precision_mean = round(np.mean(metric_precision),3)
+#                    metric_precision_std = round(np.std(metric_precision),3)
+#                    metric_recall_mean = round(np.mean(metric_recall),3)
+#                    metric_recall_std = round(np.std(metric_recall),3)
+#                    metric_f1_score_mean = round(np.mean(metric_f1_score),3)
+#                    metric_f1_score_std = round(np.std(metric_f1_score),3)
+#                    
+                    
+#                    ## Amalgamate results into one dictionary
+#                    details = {'method': current_model,
+#                               'threshold': thresh,
+#                               'iou mean':metric_iou_mean,
+#                               'iou std':metric_iou_std,
+#                               'precision mean':metric_precision_mean,
+#                               'precision std':metric_precision_std,
+#                               'recall mean':metric_recall_mean,
+#                               'recall std':metric_recall_std,
+#                               'f1 score mean':metric_f1_score_mean,
+#                               'f1 score std':metric_f1_score_std}
+                    
+#                    ## Amalgamate results into one dictionary
+#                    details = {'method': current_model,
+#                               'threshold': thresh,
+#                               'iou mean':metric_iou_mean,
+#                               'iou std':metric_iou_std}
+#                    
+#                    ## Save results to global dictionary of results
+#                    model_name = current_model + '_thresh_' + str(thresh)
+#                    results_dict[model_name] = details
+#                    
+#                    ## Write results to text file
+#                    with open(results_file, 'a+') as f:
+#                        for key, value in details.items():
+#                            f.write('%s:%s\n' % (key, value))
+#                        f.write('\n')
+#                        f.close()
+#                    
+#                    ## Clean up memory
+#                    del details
+#                    del cam
+#                    del grayscale_cam
+#                    del metric_iou_mean
+#                    del metric_iou_std
+#                    del metric_precision_mean
+#                    del metric_precision_std
+#                    del metric_recall_mean
+#                    del metric_recall_std
+#                    del metric_f1_score_mean
+#                    del metric_f1_score_std
+#                    del metric_iou 
+#                    del metric_precision 
+#                    del metric_recall 
+#                    del metric_f1_score 
+#                    del cam_algorithm
+#          
+#                    torch.cuda.empty_cache()
+#        
+#                ## Save parameters         
+#                with open(parameter_file, 'w') as f:
+#                    json.dump(parameters.__dict__, f, indent=2)
+#                f.close 
+#                    
+#                ## Save results
+#                results_savepath = parameters.outf.replace('output','baseline_experiments') + '/results_eigencam.npy'
+#                np.save(results_savepath, results_dict, allow_pickle=True)
+        
+        
+        
+        

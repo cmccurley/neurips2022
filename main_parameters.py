@@ -52,7 +52,7 @@ def set_parameters(args):
     
     parser = argparse.ArgumentParser(description='Training script for bag-level classifier.')
     
-    parser.add_argument('--run_mode', help='Mode to train, test, or compute CAMS. (cam)', default='test', type=str)
+    parser.add_argument('--run_mode', help='Mode to train, test, or compute CAMS. (cam)', default='evaluate_cam_faithfulness', type=str)
     
     ######################################################################
     ######################### Input Parameters ###########################
@@ -66,9 +66,11 @@ def set_parameters(args):
     
 #    parser.add_argument('--cams', help='List of CAMs to compute.', nargs='+', default=['gradcam','gradcam++','layercam','scorecam','ablationcam','eigencam'])
 #    parser.add_argument('--CAM_SEG_THRESH', help='Hard threshold to convert CAM to segmentation decision.', nargs='+', default=[0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
-    parser.add_argument('--layers', help='Layers to compute CAM at.', nargs='+', default=[4,9,16,23,30])
+#    parser.add_argument('--layers', help='Layers to compute CAM at.', nargs='+', default=[4,9,16,23,30])
 #    parser.add_argument('--CAM_SEG_THRESH', help='Hard threshold to convert CAM to segmentation decision.', nargs='+', default=[0.001, 0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.8, 0.9])
     
+    parser.add_argument('--layers', help='Layers to compute CAM at.', nargs='+', default=[30])
+    parser.add_argument('--cams', help='List of CAMs to compute.', nargs='+', default=['gradcam++'])
     
     ## Feature ranking parameters
     parser.add_argument('--fitness_function', help='Fitness/scoring function for feature ranking. (miou or importance)', default='miou', type=str)
@@ -97,6 +99,7 @@ def set_parameters(args):
 #    ## Hyperparameters
 #    parser.add_argument('--NUM_CLASSES', help='Number of classes in the data set.', default=2, type=int)
     parser.add_argument('--BATCH_SIZE', help='Input batch size for training.', default=20, type=int)
+    parser.add_argument('--TEST_BATCH_SIZE', help='Input batch size for training.', default=1, type=int)
     parser.add_argument('--EPOCHS', help='Number of epochs to train.', default=100, type=int)
     parser.add_argument('--LR', help='Learning rate.', default=0.001, type=float)
 #    

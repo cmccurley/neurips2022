@@ -25,7 +25,7 @@ from dataloaders import loaderPASCAL, loaderDSIAC
 ######################################################################
 def define_transforms(parameters):
     
-    if (parameters.run_mode == 'cam') or (parameters.run_mode == 'test-cams'):
+    if (parameters.run_mode == 'cam') or (parameters.run_mode == 'test-cams') or (parameters.run_mode == 'evaluate_cam_faithfulness'):
         
         if (parameters.DATASET == 'dsiac'):
             transform = transforms.Compose([transforms.ToTensor()])
@@ -60,6 +60,22 @@ def define_transforms(parameters):
     target_transform = transforms.Compose([transforms.ToTensor()])
     
     return transform, target_transform, parameters
+
+######################################################################
+############### Define Transform when Visualizing CAMs ###############
+######################################################################
+def cam_model_transforms(parameters):
+    
+    if (parameters.DATASET == 'mnist'):
+        
+        parameters.MNIST_MEAN = (0.1307,)
+        parameters.MNIST_STD = (0.3081,)
+        transform = transforms.Normalize(parameters.MNIST_MEAN, parameters.MNIST_STD)
+        
+    else:
+        transform = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+    
+    return transform
 
 ######################################################################
 ######################### Define Dataloaders #########################
@@ -101,7 +117,7 @@ def define_dataloaders(transform, target_transform, parameters):
                                                  collate_fn=None, 
                                                  pin_memory=False)
         test_loader = torch.utils.data.DataLoader(testset, 
-                                                  batch_size=parameters.BATCH_SIZE, 
+                                                  batch_size=parameters.TEST_BATCH_SIZE, 
                                                   shuffle=False, 
                                                   num_workers=0, 
                                                   collate_fn=None, 
@@ -131,7 +147,7 @@ def define_dataloaders(transform, target_transform, parameters):
         
         train_loader = torch.utils.data.DataLoader(trainset, batch_size=parameters.BATCH_SIZE, shuffle=True, pin_memory=False)
         valid_loader = torch.utils.data.DataLoader(validset, batch_size=parameters.BATCH_SIZE, shuffle=True, pin_memory=False) 
-        test_loader = torch.utils.data.DataLoader(testset, batch_size=parameters.BATCH_SIZE, shuffle=True, pin_memory=False)
+        test_loader = torch.utils.data.DataLoader(testset, batch_size=parameters.TEST_BATCH_SIZE, shuffle=True, pin_memory=False)
         
     elif (parameters.DATASET == 'dsiac'):
         
@@ -152,7 +168,7 @@ def define_dataloaders(transform, target_transform, parameters):
         
         train_loader = torch.utils.data.DataLoader(trainset, batch_size=parameters.BATCH_SIZE, shuffle=True, pin_memory=False)
         valid_loader = torch.utils.data.DataLoader(validset, batch_size=parameters.BATCH_SIZE, shuffle=True, pin_memory=False) 
-        test_loader = torch.utils.data.DataLoader(testset, batch_size=parameters.BATCH_SIZE, shuffle=True, pin_memory=False)
+        test_loader = torch.utils.data.DataLoader(testset, batch_size=parameters.TEST_BATCH_SIZE, shuffle=True, pin_memory=False)
         
     elif (parameters.DATASET == 'mnist'):
         
@@ -179,8 +195,8 @@ def define_dataloaders(transform, target_transform, parameters):
         testset = datasets.MNIST(parameters.mnist_data_path, train=True,download=True,transform=transform)
         
         train_loader = torch.utils.data.DataLoader(trainset, batch_size=parameters.BATCH_SIZE, shuffle=True, pin_memory=False)
-        test_loader = torch.utils.data.DataLoader(testset, batch_size=parameters.BATCH_SIZE, shuffle=True, pin_memory=False)
         valid_loader = torch.utils.data.DataLoader(validset, batch_size=parameters.BATCH_SIZE, shuffle=True, pin_memory=False) 
+        test_loader = torch.utils.data.DataLoader(testset, batch_size=parameters.TEST_BATCH_SIZE, shuffle=True, pin_memory=False)
 
     return train_loader, valid_loader, test_loader, classes, parameters
 

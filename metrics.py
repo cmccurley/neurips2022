@@ -11,6 +11,7 @@ Created on Mon Apr 11 15:25:46 2022
 %================= Import Settings and Packages ======================
 %=====================================================================
 """
+import numpy as np
 
 
 """
@@ -23,19 +24,52 @@ Created on Mon Apr 11 15:25:46 2022
 ######################################################################
 ##################### Faithfulness Functions #########################
 ######################################################################
-## Compute ID
-def compute_ID():
+## Compute ID (Higher value is better)
+def compute_ID(input_image, cam_heatmap, image_label, model):
+    
+    ## Compute explanation image
+    cam_image = np.matmul(cam_heatmap, input_image)
+    
+    ## Pull out softmax outputs for class (image_label)
+    Y = model(input_image)
+    O = model(cam_image)
+    
+    ## Compare if cam image increases class prediction
+    if (O > Y):
+        ID = 1
+    else:
+        ID = 0
     
     return ID
 
-## Compute AD
-def compute_AD():
+## Compute AD (Lower value is better)
+def compute_AD(input_image, cam_heatmap, image_label, model):
+    
+    ## Compute explanation image
+    cam_image = np.matmul(cam_heatmap, input_image)
+    
+    ## Pull out softmax outputs for class (image_label)
+    Y = model(input_image)
+    O = model(cam_image)
+    
+    ## Compute Average Drop
+    AD = max(0,Y - O)/Y
     
     return AD
 
 
-## Compute ADD
-def compute_ADD():
+## Compute ADD (Higher is better)
+def compute_ADD(input_image, cam_heatmap, image_label, model):
+    
+    ## Compute inverted explanation image
+    cam_image = np.matmul((1 - cam_heatmap), input_image)
+    
+    ## Pull out softmax outputs for class (image_label)
+    Y = model(input_image)
+    D = model(cam_image)
+    
+    ## Compute Average Drop in Deletion
+    ADD = (Y - D)/Y
     
     return ADD
 
