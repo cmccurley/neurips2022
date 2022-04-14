@@ -70,7 +70,7 @@ def set_parameters(args):
 #    parser.add_argument('--CAM_SEG_THRESH', help='Hard threshold to convert CAM to segmentation decision.', nargs='+', default=[0.001, 0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.8, 0.9])
     
     parser.add_argument('--layers', help='Layers to compute CAM at.', nargs='+', default=[30])
-    parser.add_argument('--cams', help='List of CAMs to compute.', nargs='+', default=['gradcam++'])
+    parser.add_argument('--cams', help='List of CAMs to compute.', nargs='+', default=['layercam'])
     
     ## Feature ranking parameters
     parser.add_argument('--fitness_function', help='Fitness/scoring function for feature ranking. (miou or importance)', default='miou', type=str)

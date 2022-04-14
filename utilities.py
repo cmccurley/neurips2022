@@ -192,7 +192,7 @@ def define_dataloaders(transform, target_transform, parameters):
         
         trainset = datasets.MNIST(parameters.mnist_data_path, train=True,download=True,transform=transform)
         validset = datasets.MNIST(parameters.mnist_data_path, train=False,download=True,transform=transform)
-        testset = datasets.MNIST(parameters.mnist_data_path, train=True,download=True,transform=transform)
+        testset = datasets.MNIST(parameters.mnist_data_path, train=False,download=True,transform=transform)
         
         train_loader = torch.utils.data.DataLoader(trainset, batch_size=parameters.BATCH_SIZE, shuffle=True, pin_memory=False)
         valid_loader = torch.utils.data.DataLoader(validset, batch_size=parameters.BATCH_SIZE, shuffle=True, pin_memory=False) 

@@ -64,6 +64,8 @@ from test_network import test_model
 
 from util import convert_gt_img_to_mask, cam_img_to_seg_img
 
+from metrics import compute_ID, compute_AD, compute_ADD
+
 
 torch.manual_seed(24)
 torch.set_num_threads(1)
@@ -598,10 +600,9 @@ if __name__== "__main__":
             for layer in parameters.layers:      
                 
                 n_samples = len(test_loader)
-#                metric_iou = np.zeros(n_samples, dtype="float32")
-#                metric_precision = np.zeros(n_samples, dtype="float32")
-#                metric_recall = np.zeros(n_samples, dtype="float32")
-#                metric_f1_score = np.zeros(n_samples, dtype="float32")
+                metric_ID = np.zeros(n_samples, dtype="float32")
+                metric_AD = np.zeros(n_samples, dtype="float32")
+                metric_ADD = np.zeros(n_samples, dtype="float32")
                 
                 current_model = current_cam + '_' + cam_layers[layer]
 #                print(current_model+'_thresh_'+str(thresh))
@@ -615,37 +616,37 @@ if __name__== "__main__":
                 
                 idx = 0
                 for data in tqdm(test_loader):
-              
-#                    images, labels, gt_images = data[0].to(device), data[1].to(device), data[2]
                     
-                    images, labels = data[0].to(device), data[1].to(device)
+                    input_image, true_label = data[0].to(device), data[1].to(device)
+                    
+                    ## Convert true label to integer
+                    true_label = true_label.detach().cpu().numpy()[0]
                     
                     ## Normalize input to the model
-                    model_input = norm_image(images)
+                    model_input = norm_image(input_image)
                     
                     ## Get estimated image-level label
-                    
-#                    criterion = nn.CrossEntropyLoss()
-#                    loss = criterion(outputs, labels)
-                    
                     pred_label = model(model_input).argmax()
                     
-                    ####################### Get CAM Heatmap #######################
+                    ## Get CAM Heatmap 
                     grayscale_cam = cam(input_tensor=model_input, target_category=int(pred_label))
                     grayscale_cam = grayscale_cam[0, :]
                     
-                    ## Visualize input and CAMs
-                    images = images.permute(2,3,1,0)
-                    images = images.detach().cpu().numpy()
-                    image = images[:,:,:,0]
-                    img = image
+                    ## Compute faithfulness metrics for each sample
+                    metric_ID[idx] = compute_ID(model_input, grayscale_cam, true_label, model, device)
+                    metric_AD[idx] = compute_AD(model_input, grayscale_cam, true_label, model, device)
+                    metric_ADD[idx] = compute_ADD(model_input, grayscale_cam, true_label, model, device)
                     
-                    ## Plot CAMs
-                    fig, axis = plt.subplots(nrows=1, ncols=2)
-                    axis[0].imshow(img) 
-                    cam_image = show_cam_on_image(img, grayscale_cam, True)
-                    axis[1].imshow(cam_image, cmap='jet')
+                    
+                    ## Iterate sample
+                    idx += 1
+                    
+                    
             
+                ## Compute means over metrics
+                IC = np.sum(metric_ID)/len(metric_ID)
+                AD = np.sum(metric_AD)/len(metric_AD)
+                ADD = np.sum(metric_AD)/len(metric_ADD)
                     
         
                         
