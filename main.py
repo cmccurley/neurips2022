@@ -57,6 +57,7 @@ from torchvision.transforms import ToTensor
 ## Custom packages
 import main_parameters
 import initialize_network
+from initialize_network import get_torchray_model
 
 from utilities import define_transforms, define_dataloaders, cam_model_transforms
 from train_network import train_model
@@ -116,7 +117,11 @@ if __name__== "__main__":
     ####################### Initialize Network ###########################
     ######################################################################
     ## Define model
-    model = initialize_network.init(parameters)
+    if (parameters.DATASET == 'mnist'):
+        model = initialize_network.init(parameters)
+    elif (parameters.DATASET == 'voc') or (parameters.DATASET == 'coco') or (parameters.DATASET == 'imagenet'):
+        model = get_torchray_model(parameters)
+    
     
     ## Save initial weights for further training
     temptrain = parameters.outf + parameters.parameter_path
@@ -140,7 +145,6 @@ if __name__== "__main__":
         ## Test image-level classifier
         test_model(model, test_loader, classes, device, parameters)
         
-
     elif (parameters.run_mode == 'cam'):
         ######################################################################
         ########################### Compute CAMs #############################

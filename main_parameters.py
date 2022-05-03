@@ -58,7 +58,7 @@ def set_parameters(args):
     ######################### Input Parameters ###########################
     ######################################################################
     
-    parser.add_argument('--DATASET', help='Dataset selection.', default='mnist', type=str)
+    parser.add_argument('--DATASET', help='Dataset selection.', default='voc', type=str)
     parser.add_argument('--DATABASENAME', help='Relative path to the training data list.', default='', type=str)
  
     parser.add_argument('--target_classes', help='List of target classes.', nargs='+', default=['aeroplane'])
@@ -117,7 +117,7 @@ def set_parameters(args):
     
     ## Output parameters
     parser.add_argument('--loss_file', help='Where to save training and validation loss updates.', default='/loss.txt', type=str)
-    parser.add_argument('--outf', help='Where to save output files.', default='./output/mnist/vgg16/output', type=str)
+    parser.add_argument('--outf', help='Where to save output files.', default='./output/pascal/vgg16_torchray/output', type=str)
     parser.add_argument('--NUMWORKERS', help='', default=0, type=int)
     
     

@@ -25,6 +25,9 @@ Created on Thu Apr 22 15:57:04 2021
 import torch
 import torch.nn as nn
 
+## Torchray models
+from torchray.benchmark import models
+
 ######################################################################
 ##################### Function Definitions ###########################
 ######################################################################
@@ -85,6 +88,34 @@ def init(parameters):
         model_dict = model.state_dict() # Load existing parameters
         model_dict.update(pretrain_dict) # Overwrite encoder and decoder of existing model
         model.load_state_dict(model_dict) # Set weights
+    
+    return model
+
+
+def get_torchray_model(parameters):
+    
+    ## Get pre-trained TorchRay model
+    if (parameters.model == 'vgg16') and (parameters.DATASET == 'voc'):
+        model = models.get_model(arch='vgg16', dataset='voc', convert_to_fully_convolutional=False)
+        print('Initialized VGG16 Model on PASCAL!')
+    elif (parameters.model == 'resnet50') and (parameters.DATASET == 'voc'):
+        model = models.get_model(arch='resnet50', dataset='voc', convert_to_fully_convolutional=False)
+        print('Initialized ResNet50 Model on PASCAL!')
+    elif (parameters.model == 'vgg16') and (parameters.DATASET == 'coco'):
+        model = models.get_model(arch='vgg16', dataset='coco', convert_to_fully_convolutional=False)
+        print('Initialized VGG16 Model on COCO!')
+    elif (parameters.model == 'resnet50') and (parameters.DATASET == 'coco'):
+        model = models.get_model(arch='resnet50', dataset='coco', convert_to_fully_convolutional=False)
+        print('Initialized ResNet50 Model on COCO!')
+    elif (parameters.model == 'vgg16') and (parameters.DATASET == 'imagenet'):
+        model = models.get_model(arch='vgg16', dataset='imagenet', convert_to_fully_convolutional=False)
+        print('Initialized VGG16 Model on ImageNet!')    
+    elif (parameters.model == 'resnet50') and (parameters.DATASET == 'imagenet'):
+        model = models.get_model(arch='resnet50', dataset='imagenet', convert_to_fully_convolutional=False)
+        print('Initialized ResNet50 Model on ImageNet!')
+    else:
+        print('!!!Invalid model parameters!!!')
+    
     
     return model
 
